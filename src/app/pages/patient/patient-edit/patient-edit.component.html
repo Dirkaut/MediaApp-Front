@@ -1,0 +1,42 @@
+<form [formGroup]="form" class="example-container" (submit)="operate()">
+
+    <div [hidden]="true">
+        <mat-form-field>
+            <input matInput placeholder="ID" required formControlName="idPatient">
+        </mat-form-field>
+    </div>
+
+    <mat-form-field>
+        <input matInput placeholder="FirstName" required formControlName="firstName">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="LastName" required formControlName="lastName">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="DNI" required formControlName="dni">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="Address" required formControlName="address">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="Phone" required formControlName="phone">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="Email" required formControlName="email">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">
+        <mat-icon>done</mat-icon>
+        <span>Done</span>
+    </button>
+
+    <button mat-raised-button color="accent" type="button" routerLink="/pages/patient">
+        <mat-icon>cancel</mat-icon>
+        <span>Cancel</span>
+    </button>
+</form>

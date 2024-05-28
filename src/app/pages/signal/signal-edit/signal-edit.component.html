@@ -1,0 +1,36 @@
+<form [formGroup]="form" class="example-container" (submit)="operate()">
+    <div [hidden]="true">
+        <mat-form-field>
+            <input matInput placeholder="ID" required formControlName="idSignal">
+        </mat-form-field>
+    </div>
+    <mat-form-field>
+        <input matInput placeholder="Patient" required formControlName="patient">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="Date" required formControlName="date">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="Temperature" required formControlName="temperature">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="Pulse" required formControlName="pulse">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="BreathingRhythm" required formControlName="breathingRhythm">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">
+        <mat-icon>done</mat-icon>
+        <span>Done</span>
+    </button>
+
+    <button mat-raised-button color="accent" type="button" routerLink="/pages/signal">
+        <mat-icon>cancel</mat-icon>
+        <span>Cancel</span>
+    </button>
+</form>

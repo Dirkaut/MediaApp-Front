@@ -1,0 +1,16 @@
+
+<p>
+    <mat-toolbar>
+      <span >Welcome : {{username}}</span>
+    </mat-toolbar>
+  </p>
+
+  <p>
+    <mat-toolbar>Roles : 
+    <ul>
+       @for (r of roles; track $index) {
+        <li> {{r}}</li>
+        }
+    </ul>
+    </mat-toolbar>
+  </p>

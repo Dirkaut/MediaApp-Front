@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Patient } from '../model/patient';
 import { Subject } from 'rxjs';
 import { GenericService } from './generic.service';
+import { Signal } from '../model/signal';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,10 @@ export class PatientService extends GenericService<Patient>{
 
   listPageable(p: number, s: number){
     return this.http.get<any>(`${this.url}/pageable?page=${p}&size=${s}`);
+  }
+
+  getSignals(idPatient: number){
+    return this.http.get<Signal[]>(`${this.url}/signals/${idPatient}`);
   }
 
   /*constructor(private http: HttpClient) { }

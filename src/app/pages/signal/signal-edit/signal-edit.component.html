@@ -1,3 +1,5 @@
+
+
 <form [formGroup]="form" class="example-container" (submit)="operate()">
     <div [hidden]="true">
         <mat-form-field>
@@ -8,8 +10,13 @@
         <input matInput placeholder="Patient" required formControlName="patient">
     </mat-form-field>
 
-    <mat-form-field>
-        <input matInput placeholder="Date" required formControlName="date">
+    <mat-form-field appearance="fill">
+        <mat-label>Choose a date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="date"
+            (dateChange)="getDate($event)">
+        <mat-hint>DD/MM/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field>
@@ -33,4 +40,13 @@
         <mat-icon>cancel</mat-icon>
         <span>Cancel</span>
     </button>
+
+    
 </form>
+
+<button mat-fab color="primary" style="float: right;" routerLink="/pages/patient/new">
+    <mat-icon>add</mat-icon>
+  </button>
+
+
+<router-outlet />

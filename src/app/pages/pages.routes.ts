@@ -14,6 +14,7 @@ import { Not403Component } from './not403/not403.component';
 import { ProfileComponent } from './profile/profile.component';
 import { SignalComponent } from './signal/signal.component';
 import { SignalEditComponent } from './signal/signal-edit/signal-edit.component';
+import { SignalSearchComponent } from './signal/signal-search/signal-search.component';
 
 export const pagesRoutes: Routes = [
   {
@@ -22,6 +23,7 @@ export const pagesRoutes: Routes = [
     children: [
       { path: 'new', component: PatientEditComponent },
       { path: 'edit/:id', component: PatientEditComponent },
+      { path: 'search', component: SignalComponent }
     ], canActivate: [certGuard]
   },
   { path: 'medic', component: MedicComponent, canActivate: [certGuard] },
@@ -41,6 +43,8 @@ export const pagesRoutes: Routes = [
   { path: 'signal', component: SignalComponent, 
     children: [
       { path: 'edit/:id', component: SignalEditComponent },
+      { path: 'new/:idPatient', component: SignalComponent },
+      { path: 'search/:idPatient', component: SignalSearchComponent },
     ], canActivate: [certGuard] 
   },
   { path: 'not-403', component: Not403Component},

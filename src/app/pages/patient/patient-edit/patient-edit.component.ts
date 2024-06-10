@@ -73,7 +73,6 @@ export class PatientEditComponent implements OnInit{
     patient.phone = this.form.value['phone'];
     patient.email = this.form.value['email'];
     
-    
     if(this.isEdit){
       //UPDATE
       //PRACTICA COMUN - NO IDEAL

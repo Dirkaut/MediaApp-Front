@@ -7,5 +7,6 @@ export class Signal {
     pulse: string;
     breathingRhythm: string;
     idPatient: number;
-    patientName: string;
+    fullName: string;
+    patient: Patient;
 }

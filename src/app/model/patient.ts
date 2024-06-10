@@ -6,4 +6,5 @@ export class Patient {
     address: string;
     phone: string;
     email: string;
+    signals: any[];
 }

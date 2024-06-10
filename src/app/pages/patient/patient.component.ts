@@ -4,7 +4,7 @@ import { Patient } from '../../model/patient';
 import { NgFor } from '@angular/common';
 import { MaterialModule } from '../../material/material.module';
 import { MatTableDataSource } from '@angular/material/table';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { switchMap } from 'rxjs';
 import { MatPaginator } from '@angular/material/paginator';
@@ -21,19 +21,13 @@ export class PatientComponent implements OnInit {
   //patients: Patient[];
   dataSource: MatTableDataSource<Patient>;
   columnDefinitions = [
-    { def: 'idPatient', label: 'idPatient', hide: true},
-    { def: 'firstName', label: 'FirstName', hide: false},
-    { def: 'lastName', label: 'LastName', hide: false},
-    { def: 'dni', label: 'dni', hide: false},
-    { def: 'actions', label: 'actions', hide: false}
+    { def: 'idPatient', label: 'idPatient', hide: true },
+    { def: 'firstName', label: 'FirstName', hide: false },
+    { def: 'lastName', label: 'LastName', hide: false },
+    { def: 'dni', label: 'dni', hide: false },
+    { def: 'actions', label: 'actions', hide: false },
+    { def: 'signals', label: 'signals', hide: false }
   ]
-  /*displayedColumns: string[] = [
-    'idPatient',
-    'firstName',
-    'lastName',
-    'dni',
-    'actions',
-  ];*/
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -42,15 +36,16 @@ export class PatientComponent implements OnInit {
 
   constructor(
     private patientService: PatientService,
-    private _snackBar: MatSnackBar
-    ) {}
+    private _snackBar: MatSnackBar,
+    private router: Router,
+  ) { }
 
   ngOnInit(): void {
     /*this.patientService.findAll().subscribe((data) => {
       this.createTable(data);
     });*/
 
-    this.patientService.listPageable(0, 2).subscribe(data => {
+    this.patientService.listPageable(0, 5).subscribe(data => {
       this.totalElements = data.totalElements;
       this.createTable(data.content);
     });
@@ -60,17 +55,17 @@ export class PatientComponent implements OnInit {
     });
 
     this.patientService.getMessageChange().subscribe(data => {
-      this._snackBar.open(data, 'INFO', {duration: 2000, verticalPosition: 'top', horizontalPosition: 'right'});
+      this._snackBar.open(data, 'INFO', { duration: 2000, verticalPosition: 'top', horizontalPosition: 'right' });
     })
   }
 
-  delete(idPatient: number){
+  delete(idPatient: number) {
     this.patientService.delete(idPatient)
-    .pipe(switchMap( ()=> this.patientService.findAll() ))
-    .subscribe(data => {
-      this.patientService.setPatientChange(data);
-      this.patientService.setMessageChange('DELETED!');
-    })
+      .pipe(switchMap(() => this.patientService.findAll()))
+      .subscribe(data => {
+        this.patientService.setPatientChange(data);
+        this.patientService.setMessageChange('DELETED!');
+      })
   }
 
   createTable(data: Patient[]) {
@@ -79,19 +74,30 @@ export class PatientComponent implements OnInit {
     this.dataSource.sort = this.sort;
   }
 
-  getDisplayedColumns():string[] {
-    return this.columnDefinitions.filter(cd=>!cd.hide).map(cd=>cd.def);
+  getDisplayedColumns(): string[] {
+    return this.columnDefinitions.filter(cd => !cd.hide).map(cd => cd.def);
   }
 
-  applyFilter(e: any){
+  applyFilter(e: any) {
     this.dataSource.filter = e.target.value.trim();
     //this.dataSource.filterPredicate = () => { };
   }
 
-  showMore(e: any){
+  showMore(e: any) {
     this.patientService.listPageable(e.pageIndex, e.pageSize).subscribe(data => {
       this.totalElements = data.totalElements;
       this.createTable(data.content);
+    });
+  }
+
+  createSignals(idPatient: number) {
+    this.patientService.findById(idPatient).subscribe(data => {
+      if (data.signals.length > 0) {
+        this.router.navigate(['/pages/signal/search', idPatient]);
+      } else {
+        this.router.navigate(['/pages/signal/new', idPatient]);
+        
+      }
     });
   }
 }

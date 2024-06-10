@@ -1,97 +1,130 @@
-import { Component, ViewChild} from '@angular/core';
+import { Component} from '@angular/core';
 import { MaterialModule } from '../../material/material.module';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { SignalService } from '../../services/signal.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Signal } from '../../model/signal';
-import { MatSort } from '@angular/material/sort';
 import { switchMap } from 'rxjs';
 import { Patient } from '../../model/patient';
 import { PatientService } from '../../services/patient.service';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-signal',
   standalone: true,
-  imports: [MaterialModule, MaterialModule, RouterLink, RouterOutlet],
+  imports: [MaterialModule, RouterLink, RouterOutlet,ReactiveFormsModule],
   templateUrl: './signal.component.html',
   styleUrl: './signal.component.css'
 })
 export class SignalComponent {
 
-  dataSource: MatTableDataSource<Signal>;
-  patient: Patient = new Patient();
-  columnDefinitions = [
-    { def: 'idSignal', label: 'idSingal', hide: true },
-    { def: 'patientName', label: 'patientName', hide: false },
-    { def: 'date', label: 'date', hide: false },
-    { def: 'temperature', label: 'temperature', hide: false },
-    { def: 'pulse', label: 'pulse', hide: false },
-    { def: 'breathingRhythm', label: 'breathingRhythm', hide: false },
-    { def: 'actions', label: 'actions', hide: false }
-  ]
-
-  @ViewChild(MatSort) sort: MatSort;
+  form: FormGroup;
+  id: number;
+  isEdit: boolean;
+  patientName: string;
+  idPatient: number;
+  minDate: Date = new Date();
 
   constructor(
+
     private signalService: SignalService,
     private patientService: PatientService,
-    private _snackBar: MatSnackBar,
-    private router: Router
+    private route: ActivatedRoute,
+    private router: Router,
   ) { }
 
   ngOnInit(): void {
-    this.signalService.findAll().subscribe((data) => {
-      this.chargePatientName(data);
-      this.createTable(data);
+    this.form = new FormGroup({
+      idSignal: new FormControl(0),
+      patient: new FormControl({ value: '', disabled: false}),
+      date: new FormControl({ value: '', disabled: true }),
+      temperature: new FormControl({ value: '', disabled: true }),
+      pulse: new FormControl({ value: '', disabled: true }),
+      breathingRhythm: new FormControl({ value: '', disabled: true })
     });
 
-    this.signalService.getSignalChange().subscribe((data) => {
-      this.createTable(data);
+    
+    this.route.params.subscribe(data => {
+      console.log(data['id']);
+      this.id = data['id'];
+      this.isEdit = data['id'] != null;
+      this.idPatient = data['idPatient'];
+      
+      this.initForm();
     });
-
-    this.signalService.getMessageChange().subscribe(data => {
-      this._snackBar.open(data, 'INFO', { duration: 2000, verticalPosition: 'top', horizontalPosition: 'right' });
-    })
   }
 
-  private chargePatientName(data: Signal[]) {
-    data.forEach(signal => {
-      this.patientService.findById(signal.idPatient).subscribe(data => {
-        signal.patientName = data.firstName + ' ' + data.lastName;
+  initForm() {
+    if (this.isEdit) {
+      this.signalService.findById(this.id).subscribe(data => {
+        this.idPatient = data.idPatient;
+        this.form = new FormGroup({
+          idSignal: new FormControl(data.idSignal),
+          patient: new FormControl(data.fullName),
+          date: new FormControl(data.date),
+          temperature: new FormControl(data.temperature),
+          pulse: new FormControl(data.pulse),
+          breathingRhythm: new FormControl(data.breathingRhythm)
+        });
       });
-    });
+    }
+    else if (this.idPatient != null) {
+      this.patientService.findById(this.idPatient).subscribe(data => {
+        this.form = new FormGroup({
+          idSignal: new FormControl(0),
+          patient: new FormControl(data.firstName + ' ' + data.lastName),
+          date: new FormControl(''),
+          temperature: new FormControl(''),
+          pulse: new FormControl(''),
+          breathingRhythm: new FormControl('')
+        });
+      });
+    }
   }
 
-  delete(idSignal: number) {
-    this.signalService.delete(idSignal)
-      .pipe(switchMap(() => this.signalService.findAll()))
-      .subscribe(data => {
-        this.chargePatientName(data);
-        this.signalService.setSignalChange(data);
-        this.signalService.setMessageChange('DELETED!');
-      })
+  operate() {
+    const signal: Signal = new Signal();
+    const patient: Patient = new Patient();
+    patient.idPatient = this.idPatient;
+    signal.idSignal = this.form.value['idSignal'];
+    //const x = this.form.controls['idPatient'].value;
+    //const y = this.form.get('idPatient').value;
+    // signal.firstName = this.form.value['firstName'];
+    signal.date = this.form.value['date'];
+    signal.temperature = this.form.value['temperature'];
+    signal.pulse = this.form.value['pulse'];
+    signal.breathingRhythm = this.form.value['breathingRhythm'];
+    signal.patient = patient;
+
+    if (this.isEdit) {
+      //UPDATE
+      //PRACTICA COMUN - NO IDEAL
+      console.log(signal);
+      this.signalService.update(this.id, signal).subscribe(() => {
+        this.signalService.findAll().subscribe(data => {
+          this.signalService.setSignalChange(data);
+          this.signalService.setMessageChange('UPDATED!');
+        });
+      });
+    } else {
+      //INSERT
+      //PRACTICA IDEAL
+      this.signalService.save(signal)
+        .pipe(switchMap(() => this.signalService.findAll()))
+        .subscribe(data => {
+          this.signalService.setSignalChange(data);
+          this.signalService.setMessageChange('CREATED!');
+        });
+    }
+
+    this.router.navigate(['/pages/signal']);
   }
 
-  createTable(data: Signal[]) {
-    this.dataSource = new MatTableDataSource(data);
-    //this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+  checkChildren(): boolean{
+    return this.route.children.length == 0;
   }
-
-  getDisplayedColumns(): string[] {
-    return this.columnDefinitions.filter(cd => !cd.hide).map(cd => cd.def);
+  getDate(e: any){
+    console.log(e.value);
   }
-
-  applyFilter(e: any) {
-    this.dataSource.filter = e.target.value.trim();
-    //this.dataSource.filterPredicate = () => { };
-  }
-
-  navigate(idSignal: number, patientName: string) {
-    sessionStorage.setItem('patientName', patientName);
-      this.router.navigate([`pages/signal/edit/${idSignal}`]);
-  }
-  
-
 }
+
+
